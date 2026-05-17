@@ -1,10 +1,11 @@
 [tool.poetry]
 name = "pychlorinator"
-version = "0.2.14b2"
-description = ""
+version = "0.3.2"
+description = "Astral Pool Chlorinator BLE API with write support for pH and chlorine setpoints"
 authors = ["pbutterworth <3683210+pbutterworth@users.noreply.github.com>"]
+maintainers = ["kesawi <14970452+kesawi@users.noreply.github.com>"]
 readme = "README.md"
-repository = "https://github.com/pbutterworth/pychlorinator"
+repository = "https://github.com/kesawi/pychlorinator"
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -20,4 +21,4 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.urls]
-Homepage = "https://github.com/pbutterworth/pychlorinator"
+Homepage = "https://github.com/kesawi/pychlorinator"
