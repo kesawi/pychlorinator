@@ -1,15 +1,36 @@
-# pychlorinator
+# Astral Pool Viron eQuilibrium Chlorinator — pychlorinator
 
-[![PyPI - Version](https://img.shields.io/pypi/v/pychlorinator?style=for-the-badge&logo=python&logoColor=green)](https://pypi.org/project/pychlorinator/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pychlorinator?style=for-the-badge&logo=python&logoColor=green)](https://python.org)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/pychlorinator?label=Downloads&style=for-the-badge)](https://pypi.org/project/pychlorinator)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+
+This is a fork of [@pbutterworth](https://github.com/pbutterworth)'s [pychlorinator](https://github.com/pbutterworth/pychlorinator) library.
 
 A Python BLE (Bluetooth Low Energy) library for controlling **Astral Pool Viron eQuilibrium** and **Halo** series pool chlorinators.
 
-It is the foundation for the Home Assistant [Astral Pool Viron eQuilibrium Chlorinator](https://github.com/pbutterworth/astralpool_chlorinator) integration.
+It is the foundation for the Home Assistant [Astral Pool Viron eQuilibrium Chlorinator](https://github.com/kesawi/astralpool_chlorinator) integration forked from [@pbutterworth](https://github.com/pbutterworth)'s [astralpool_chlorinator](https://github.com/pbutterworth/astralpool_chlorinator).
 
-[![Buy Me A Coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=&slug=pbutterworQ&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff)](https://www.buymeacoffee.com/pbutterworQ)
+## Changes from upstream
+
+All current changes have been merged into the upstream repository.
+
+## Enabling debug logging
+
+To log full coordinator data in Home Assistant, add to `configuration.yaml`:
+
+```yaml
+logger:
+  logs:
+    pychlorinator.chlorinator: debug
+```
+
+## Compatibility
+
+- Tested on Viron EQ25
+- Other Viron models should work but are untested
+- Halo series: `halochlorinator.py` is unchanged from upstream
+
+## Credits
+
+- [@pbutterworth](https://github.com/pbutterworth) — original library and protocol reverse engineering
 
 ---
 
@@ -46,6 +67,14 @@ It is the foundation for the Home Assistant [Astral Pool Viron eQuilibrium Chlor
 ---
 
 ## Installation
+
+To install this fork directly:
+
+```bash
+pip install git+https://github.com/kesawi/pychlorinator@main
+```
+
+To install the upstream package from PyPI:
 
 ```bash
 pip install pychlorinator
@@ -173,26 +202,12 @@ asyncio.run(main())
 
 ## Contributing
 
-Contributions are welcome. Please open an issue to discuss significant changes before submitting a pull request.
-
-```bash
-# Install dev dependencies
-pip install poetry
-poetry install
-
-# Run pre-commit hooks
-pre-commit install
-pre-commit run --all-files
-
-# Run tests
-python -m pytest
-```
-
----
+Contributions should be made to the upstream repository ([pbutterworth/pychlorinator](https://github.com/pbutterworth/pychlorinator))
 
 ## Related
 
-- [astralpool_chlorinator](https://github.com/pbutterworth/astralpool_chlorinator) — Home Assistant custom integration that uses this library
+- Original [@pbutterworth](https://github.com/pbutterworth)'s [astralpool_chlorinator](https://github.com/pbutterworth/astralpool_chlorinator) — Home Assistant custom integration that uses this library
+- My forked [astralpool_chlorinator](https://github.com/kesawi/astralpool_chlorinator) — Home Assistant custom integration that uses this library
 
 ---
 
