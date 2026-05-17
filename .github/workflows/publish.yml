@@ -15,12 +15,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.8'  # or any specific Python version required for your project
+          python-version: '3.8'
 
       - name: Install Poetry
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+        uses: snok/install-poetry@v1
+        with:
+          version: 2.4.1
+          virtualenvs-in-project: true
 
       - name: Build and publish to PyPI
         env:
