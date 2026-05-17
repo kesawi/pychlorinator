@@ -13,6 +13,7 @@ from .chlorinator_parsers import (
     ChlorinatorCapabilities,
     ChlorinatorSettings,
     ChlorinatorSetup,
+    ChlorinatorSetupWrite,
     ChlorinatorState,
     ChlorinatorStatistics,
     ChlorinatorTimers,
@@ -88,7 +89,7 @@ class ChlorinatorAPI:
         self._session_key = None
         self._result: dict[str, Any] | None = None
 
-    async def async_write_action(self, action: ChlorinatorActions):
+    async def async_write_action(self, action: ChlorinatorActions, period_minutes: int = 0):
         """Connect to the Chlorinator and write an action command to it."""
 
         client = await establish_connection(
@@ -116,11 +117,68 @@ class ChlorinatorAPI:
             await client.read_gatt_char(UUID_LIGHTING_SETUP)
             await client.read_gatt_char(UUID_LIGHTING_TIMERS)
 
-            data = ChlorinatorAction(action).__bytes__()
+            data = ChlorinatorAction(action, period_minutes).__bytes__()
             _LOGGER.debug("Data to write: %s", data.hex())
             data = encrypt_characteristic(data, self._session_key)
             _LOGGER.debug("Encrypted data to write: %s", data.hex())
             await client.write_gatt_char(UUID_CHLORINATOR_APP_ACTION, data)
+        finally:
+            await client.disconnect()
+
+    async def async_write_setup(
+        self,
+        ph_control_setpoint: float = None,
+        chlorine_control_setpoint: int = None,
+        default_manual_on_speed = None,
+    ):
+        """Connect to the Chlorinator and write setup characteristic."""
+
+        client = await establish_connection(
+            BleakClientWithServiceCache,
+            self._ble_device,
+            self._ble_device.name or "Unknown Device",
+            max_attempts=4,
+        )
+
+        try:
+            self._session_key = await client.read_gatt_char(UUID_SLAVE_SESSION_KEY)
+            _LOGGER.debug("Got session key: %s", self._session_key.hex())
+
+            mac = encrypt_mac_key(self._session_key, bytes(self._access_code, "utf_8"))
+            _LOGGER.debug("Mac key to write: %s", mac)
+            await client.write_gatt_char(UUID_MASTER_AUTHENTICATION, mac)
+
+            # Read all characteristics to ensure authenticated
+            await client.read_gatt_char(UUID_CHLORINATOR_STATE)
+            await client.read_gatt_char(UUID_CHLORINATOR_TIMERS)
+            await client.read_gatt_char(UUID_CHLORINATOR_SETTINGS)
+            await client.read_gatt_char(UUID_LIGHTING_STATE)
+            await client.read_gatt_char(UUID_LIGHTING_SETUP)
+            await client.read_gatt_char(UUID_LIGHTING_TIMERS)
+
+            # Read current setup to preserve existing values
+            raw = decrypt_characteristic(
+                await client.read_gatt_char(UUID_CHLORINATOR_SETUP), self._session_key
+            )
+            current = ChlorinatorSetup(raw)
+
+            # Override only the values that were passed in
+            new_ph = ph_control_setpoint if ph_control_setpoint is not None else current.ph_control_setpoint
+            new_chlorine = chlorine_control_setpoint if chlorine_control_setpoint is not None else current.chlorine_control_setpoint
+            new_speed = default_manual_on_speed if default_manual_on_speed is not None else current.default_manual_on_speed
+
+            setup = ChlorinatorSetupWrite(
+                default_manual_on_speed=new_speed,
+                ph_control_setpoint=new_ph,
+                chlorine_control_setpoint=new_chlorine,
+                flags=current.flags,
+            )
+
+            data = bytes(setup)
+            _LOGGER.debug("Setup data to write: %s", data.hex())
+            data = encrypt_characteristic(data, self._session_key)
+            _LOGGER.debug("Encrypted setup data to write: %s", data.hex())
+            await client.write_gatt_char(UUID_CHLORINATOR_SETUP, data)
         finally:
             await client.disconnect()
 
@@ -162,7 +220,7 @@ class ChlorinatorAPI:
                 )
                 self._result.update(vars(parser(databytes)))
 
-            _LOGGER.debug(self._result)
+            _LOGGER.debug("Full coordinator data: %s", self._result)
         finally:
             await client.disconnect()
 

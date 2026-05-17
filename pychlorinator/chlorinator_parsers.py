@@ -242,6 +242,34 @@ class ChlorinatorSetup:
         )
 
 
+class ChlorinatorSetupWrite:
+    """Class to write Chlorinator Setup characteristic"""
+
+    fmt = "@BBHB"
+
+    def __init__(
+        self,
+        default_manual_on_speed: SpeedLevels,
+        ph_control_setpoint: float,
+        chlorine_control_setpoint: int,
+        flags: int,
+    ) -> None:
+        self.default_manual_on_speed = default_manual_on_speed
+        self.ph_control_setpoint = ph_control_setpoint
+        self.chlorine_control_setpoint = chlorine_control_setpoint
+        self.flags = flags
+
+    def __bytes__(self):
+        data = struct.pack(
+            self.fmt,
+            self.default_manual_on_speed.value,
+            int(self.ph_control_setpoint * 10),
+            self.chlorine_control_setpoint,
+            self.flags,
+        )
+        # Pad to 20 bytes to match characteristic length expected by AES encryption
+        return data.ljust(20, b'\x00')
+
 class ChlorinatorState:
     """Parser class for the Chlorinator State characteristic"""
 
